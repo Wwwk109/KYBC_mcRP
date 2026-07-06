@@ -1,0 +1,25 @@
+name: Build RP
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create Zip
+        run: zip -r KYBCServerRP.zip ./* -x ".*" ".github/*"
+
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git tag -d latest 2>/dev/null || true
+          git push --delete origin latest 2>/dev/null || true
+          gh release delete latest --yes 2>/dev/null || true
+          gh release create latest KYBCServerRP.zip --title "Latest Auto Build" --notes "Auto RP Build."
